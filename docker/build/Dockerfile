@@ -1,10 +1,14 @@
-FROM ubuntu:16.04 AS juno-base
+FROM ubuntu:22.04 AS juno-base
 USER root
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y \
 	cmake \
 	g++ \
 	make \
-	wget
+	wget \
+	git
+
+RUN apt-get update && apt-get install -y ca-certificates
+RUN update-ca-certificates
 
 ARG GOLANG_VERSION
 COPY /go${GOLANG_VERSION}.linux-amd64.tar.gz /
@@ -31,7 +35,6 @@ FROM juno-dev as builder
 USER root
 COPY /src/juno /juno
 COPY /build.sh /build.sh
-
 RUN /build.sh
 
 

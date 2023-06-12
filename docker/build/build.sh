@@ -18,6 +18,8 @@
 #  limitations under the License.
 #  
  
+set -eo pipefail
+cd "$(dirname "$0")"
 
 export CGO_CFLAGS="-I/usr/local/include"
 export CGO_LDFLAGS="-L/usr/local/lib -lrocksdb -lstdc++ -lm -lrt -lpthread -ldl"
@@ -36,10 +38,9 @@ juno_executables="\
         juno/cmd/storageserv/storage/db/dbcopy \
         "
 
-export PATH=/usr/local/go/bin:$PATH
-#export GOPATH=/juno
-export GOROOT=/usr/local/go
-
+export PATH="/usr/local/go/bin:$PATH"
+export GOROOT="/usr/local/go"
+export GOPROXY=direct
 cd /juno
 build_time=`date '+%Y-%m-%d_%I:%M:%S%p_%Z'`
 code_revision=`cat git_revision.txt`

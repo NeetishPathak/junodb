@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-juno-docker:
+  build-on-linux:
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -56,38 +56,55 @@ jobs:
           sleep 60
           echo "docker ps"
           docker ps
-      # - name: Connectivity Checks
-      #   id: dockerCheck
-      #   run: |
-      #     echo "Connectivity checks on listening ports"
-      #     echo "Proxy TLS"
-      #     nc -vz localhost ${PROXY_TLS_PORT}
-      #     echo "Proxy TCP"
-      #     nc -vz localhost ${PROXY_TCP_PORT}
-      #     echo "Proxy Admin"
-      #     nc -vz localhost ${PROXY_MON_PORT}
-      #     echo "Storage Admin"
-      #     nc -vz localhost ${STORAGE_MON_PORT}
-      # - name: Step To run on failure of Connectivity Check
-      #   if: failure() && steps.dockerCheck.outcome == 'failure'
-      #   run: |
-      #     docker logs etcd
-      #     docker logs clustercfg
-      #     docker logs storageserv
-      #     docker logs proxy
-      #     docker/shutdown.sh
-      # - name: Test
-      #   id: junoclientTest
-      #   run: |
-      #     docker/test.sh
-      # - name: Step To run on failure of Test
-      #   if: failure() && steps.junoclientTest.outcome == 'failure'
-      #   run: |
-      #     docker logs etcd
-      #     docker logs clustercfg
-      #     docker logs storageserv
-      #     docker logs proxy
-      #     docker/shutdown.sh
+      - name: Shutdown juno containers
+        run: |
+          echo "Shutdown juno containers"
+          docker/shutdown.sh
+          echo "docker ps"
+          docker ps
+  build-on-macos:
+    strategy:
+      matrix:
+        os: [macos-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      PROXY_TLS_PORT: 5080
+      PROXY_TCP_PORT: 8080
+      PROXY_MON_PORT: 8088
+      STORAGE_MON_PORT: 8089
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3.5.2
+      - name: Install dependencies
+        run: |
+          echo "Openssl Version:" `openssl version`
+      - name: Set up Docker
+        uses: docker-practice/actions-setup-docker@master
+        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Docker Version Check
+        run: docker version
+      # - name: Expose GitHub Runtime
+      #   uses: crazy-max/ghaction-github-runtime@v2
+      - name: Build docker containers
+        run: docker/build.sh
+      - name: Start juno containers
+        id: dockerStart
+        run: |
+          docker/start.sh
+      - name: Step To run on failure
+        if: failure() && steps.dockerStart.outcome == 'failure'
+        run: |
+          docker logs etcd 
+          docker logs clustercfg
+          docker logs storageserv
+          docker logs proxy
+          docker/shutdown.sh
+      - name: Docker containers Status
+        run: |
+          echo "Wait for service warm up..."
+          sleep 60
+          echo "docker ps"
+          docker ps
       - name: Shutdown juno containers
         run: |
           echo "Shutdown juno containers"
