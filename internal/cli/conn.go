@@ -26,8 +26,9 @@ import (
 	"net"
 	"time"
 
-	"juno/pkg/logging"
-	"juno/pkg/logging/cal"
+	"github.com/paypal/junodb/pkg/logging/cal"
+
+	"github.com/paypal/junodb/pkg/logging"
 )
 
 func TLSInitialized() bool {

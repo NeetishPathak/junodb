@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"time"
 
-	"juno/pkg/client"
-	cal "juno/pkg/logging/cal/config"
-	"juno/pkg/util"
+	"github.com/paypal/junodb/pkg/client"
+	cal "github.com/paypal/junodb/pkg/logging/cal/config"
+	"github.com/paypal/junodb/pkg/util"
 )
 
 // addr is a Juno server endpoint in the form "ip:port".
